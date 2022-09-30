@@ -3,8 +3,10 @@ package com.varketplace.user.adapter.in.api;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.varketplace.config.security.AuthenticationCurrentUserService;
 import com.varketplace.config.security.UserDetailsImpl;
+import com.varketplace.user.GetAllUsersUseCase;
 import com.varketplace.user.adapter.in.api.specification.UserSpecification;
 import com.varketplace.user.domain.model.User;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,64 +38,65 @@ import java.util.UUID;
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    UserService userService;
+    private final GetAllUsersUseCase getAllUsersUseCase;
 
-    @Autowired
-    AuthenticationCurrentUserService authenticationCurrentUserService;
+    private final AuthenticationCurrentUserService authenticationCurrentUserService;
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<User>> getAllUsers(UserSpecification.UserSpec spec,
                                                   @PageableDefault(page = 0, size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable,
-                                                  Authentication authentication){
+                                                  Authentication authentication) {
         UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        log.info("Authentication {}",userDetails.getUsername());
-        Page<User> userModelPage = userService.findAll(spec, pageable);
+        log.info("Authentication {}", userDetails.getUsername());
+
+
+        Page<User> userModelPage = getAllUsersUseCase.handle(GetAllUsersUseCase.GetAllUsersCommand.of(spec, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(userModelPage);
     }
 
     @PreAuthorize("hasAnyRole('STUDENT')")
     @GetMapping("/{userId}")
-    public ResponseEntity<Object> getById(@PathVariable(value = "userId") UUID userId){
+    public ResponseEntity<Object> getById(@PathVariable(value = "userId") UUID userId) {
         UUID currentUserId = authenticationCurrentUserService.getCurrentUser().getUserId();
-        if(currentUserId.equals(userId)) {
+        if (currentUserId.equals(userId)) {
             Optional<User> userModelOptional = userService.findById(userId);
             if (!userModelOptional.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
             } else {
                 return ResponseEntity.status(HttpStatus.OK).body(userModelOptional.get());
             }
-        }else {
+        } else {
             throw new AccessDeniedException("Forbidden");
         }
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Object> delete(@PathVariable(value = "userId") UUID userId){
+    public ResponseEntity<Object> delete(@PathVariable(value = "userId") UUID userId) {
         log.debug("DELETE deleteUser userId received {} ", userId);
         Optional<User> userModelOptional = userService.findById(userId);
-        if(!userModelOptional.isPresent()){
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-        } else{
+        if (!userModelOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        } else {
             userService.deleteUser(userModelOptional.get());
             log.debug("DELETE deleteUser userId deleted {} ", userId);
             log.info("User deleted successfully userId {} ", userId);
-            return  ResponseEntity.status(HttpStatus.OK).body("User deleted successfully.");
+            return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully.");
         }
     }
 
     @PutMapping("/{userId}")
     public ResponseEntity<Object> update(@PathVariable(value = "userId") UUID userId,
-                                             @RequestBody @Validated(UserDto.UserView.UserPut.class)
-                                             @JsonView(UserDto.UserView.UserPut.class) UserDto userDto){
+                                         @RequestBody @Validated(UserDto.UserView.UserPut.class)
+                                         @JsonView(UserDto.UserView.UserPut.class) UserDto userDto) {
         log.debug("PUT updateUser userDto received {} ", userDto.toString());
         Optional<User> userModelOptional = userService.findById(userId);
-        if(!userModelOptional.isPresent()){
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-        } else{
+        if (!userModelOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        } else {
             var userModel = userModelOptional.get();
             userModel.setFullName(userDto.getFullName());
             userModel.setPhoneNumber(userDto.getPhoneNumber());
@@ -102,32 +105,32 @@ public class UserController {
             userService.updateUser(userModel);
             log.debug("PUT updateUser userId saved {} ", userModel.getUserId());
             log.info("User updated successfully userId {} ", userModel.getUserId());
-            return  ResponseEntity.status(HttpStatus.OK).body(userModel);
+            return ResponseEntity.status(HttpStatus.OK).body(userModel);
         }
     }
 
     @PutMapping("/{userId}/password")
     public ResponseEntity<Object> updatePassword(@PathVariable(value = "userId") UUID userId,
                                                  @RequestBody @Validated(UserDto.UserView.PasswordPut.class)
-                                                 @JsonView(UserDto.UserView.PasswordPut.class) UserDto userDto){
+                                                 @JsonView(UserDto.UserView.PasswordPut.class) UserDto userDto) {
         log.debug("PUT updatePassword userDto received {} ", userDto.toString());
         Optional<User> userModelOptional = userService.findById(userId);
-        if(!userModelOptional.isPresent()){
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-        } if(!userModelOptional.get().getPassword().equals(userDto.getOldPassword())){
+        if (!userModelOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        }
+        if (!userModelOptional.get().getPassword().equals(userDto.getOldPassword())) {
             log.warn("Mismatched old password userId {} ", userId);
-            return  ResponseEntity.status(HttpStatus.CONFLICT).body("Error: Mismatched old password!");
-        } else{
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: Mismatched old password!");
+        } else {
             var userModel = userModelOptional.get();
             userModel.setPassword(userDto.getPassword());
             userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
             userService.updatePassword(userModel);
             log.debug("PUT updatePassword userId saved {} ", userModel.getUserId());
             log.info("Password updated successfully userId {} ", userModel.getUserId());
-            return  ResponseEntity.status(HttpStatus.OK).body("Password updated successfully.");
+            return ResponseEntity.status(HttpStatus.OK).body("Password updated successfully.");
         }
     }
-
 
 
 }

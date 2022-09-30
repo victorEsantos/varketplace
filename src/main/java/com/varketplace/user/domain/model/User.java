@@ -3,6 +3,7 @@ package com.varketplace.user.domain.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.varketplace.infra.domain.DomainEntity;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 public class User extends DomainEntity {
 
     @Id

@@ -1,7 +1,10 @@
 package com.varketplace.user.domain;
 
 import com.varketplace.infra.exception.ResourceNotFoundException;
+import com.varketplace.user.adapter.in.api.specification.UserSpecification;
 import com.varketplace.user.domain.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,4 +27,6 @@ public interface UserDomainRepository {
     List<User> findAll();
 
     Optional<User> findByName(String name);
+
+    Page<User> findAll(UserSpecification.UserSpec spec, Pageable pageable);
 }
