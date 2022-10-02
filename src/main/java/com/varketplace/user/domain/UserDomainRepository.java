@@ -13,14 +13,10 @@ import java.util.UUID;
 public interface UserDomainRepository {
     void save(User product);
 
-    @Deprecated
-    User findById(UUID id);
+    Optional<User> findById(UUID id);
 
     default User findByIdOrThrowNotFound(UUID id) {
-        var product = this.findById(id);
-
-        if (product == null)
-            throw new ResourceNotFoundException("User not found");
+        var product = this.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return product;
     }
 
@@ -29,4 +25,6 @@ public interface UserDomainRepository {
     Optional<User> findByName(String name);
 
     Page<User> findAll(UserSpecification.UserSpec spec, Pageable pageable);
+
+    void delete(User user);
 }

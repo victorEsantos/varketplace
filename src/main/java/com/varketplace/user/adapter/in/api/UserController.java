@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.varketplace.config.security.AuthenticationCurrentUserService;
 import com.varketplace.config.security.UserDetailsImpl;
 import com.varketplace.user.GetAllUsersUseCase;
+import com.varketplace.user.adapter.in.api.dto.UserDto;
 import com.varketplace.user.adapter.in.api.specification.UserSpecification;
 import com.varketplace.user.domain.model.User;
+import com.varketplace.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,8 @@ public class UserController {
 
     private final AuthenticationCurrentUserService authenticationCurrentUserService;
 
+    private final UserService userService;
+
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<User>> getAllUsers(UserSpecification.UserSpec spec,
@@ -54,14 +58,14 @@ public class UserController {
         log.info("Authentication {}", userDetails.getUsername());
 
 
-        Page<User> userModelPage = getAllUsersUseCase.handle(GetAllUsersUseCase.GetAllUsersCommand.of(spec, pageable));
+        Page<User> userModelPage = userService.getAll(spec, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(userModelPage);
     }
 
     @PreAuthorize("hasAnyRole('STUDENT')")
     @GetMapping("/{userId}")
     public ResponseEntity<Object> getById(@PathVariable(value = "userId") UUID userId) {
-        UUID currentUserId = authenticationCurrentUserService.getCurrentUser().getUserId();
+        UUID currentUserId = authenticationCurrentUserService.getCurrentUser().getId();
         if (currentUserId.equals(userId)) {
             Optional<User> userModelOptional = userService.findById(userId);
             if (!userModelOptional.isPresent()) {
@@ -77,36 +81,20 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<Object> delete(@PathVariable(value = "userId") UUID userId) {
         log.debug("DELETE deleteUser userId received {} ", userId);
-        Optional<User> userModelOptional = userService.findById(userId);
-        if (!userModelOptional.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-        } else {
-            userService.deleteUser(userModelOptional.get());
-            log.debug("DELETE deleteUser userId deleted {} ", userId);
-            log.info("User deleted successfully userId {} ", userId);
-            return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully.");
-        }
+        User usr = userService.findByIdOrThrowNotFound(userId);
+        userService.deleteUser(usr);
+
+        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully.");
     }
 
     @PutMapping("/{userId}")
     public ResponseEntity<Object> update(@PathVariable(value = "userId") UUID userId,
                                          @RequestBody @Validated(UserDto.UserView.UserPut.class)
                                          @JsonView(UserDto.UserView.UserPut.class) UserDto userDto) {
-        log.debug("PUT updateUser userDto received {} ", userDto.toString());
-        Optional<User> userModelOptional = userService.findById(userId);
-        if (!userModelOptional.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-        } else {
-            var userModel = userModelOptional.get();
-            userModel.setFullName(userDto.getFullName());
-            userModel.setPhoneNumber(userDto.getPhoneNumber());
-            userModel.setCpf(userDto.getCpf());
-            userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
-            userService.updateUser(userModel);
-            log.debug("PUT updateUser userId saved {} ", userModel.getUserId());
-            log.info("User updated successfully userId {} ", userModel.getUserId());
-            return ResponseEntity.status(HttpStatus.OK).body(userModel);
-        }
+
+        var usr = userService.updateUser(userId, userDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(usr);
     }
 
     @PutMapping("/{userId}/password")
@@ -124,10 +112,7 @@ public class UserController {
         } else {
             var userModel = userModelOptional.get();
             userModel.setPassword(userDto.getPassword());
-            userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
             userService.updatePassword(userModel);
-            log.debug("PUT updatePassword userId saved {} ", userModel.getUserId());
-            log.info("Password updated successfully userId {} ", userModel.getUserId());
             return ResponseEntity.status(HttpStatus.OK).body("Password updated successfully.");
         }
     }
