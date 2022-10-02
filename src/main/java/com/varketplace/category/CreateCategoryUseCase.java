@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Value;
 
 import javax.validation.constraints.NotBlank;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 public interface CreateCategoryUseCase {

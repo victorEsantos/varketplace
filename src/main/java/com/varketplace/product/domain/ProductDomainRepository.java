@@ -9,7 +9,6 @@ import java.util.UUID;
 public interface ProductDomainRepository {
     void save(Product product);
 
-    @Deprecated
     Product findById(UUID id);
 
     default Product findByIdOrThrowNotFound(UUID id){

@@ -9,6 +9,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -26,7 +27,7 @@ public class JwtProvider {
     public String generateJwt(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
         final String roles = userPrincipal.getAuthorities().stream()
-            .map(role -> role.getAuthority()).collect(Collectors.joining(","));
+            .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
 
         return Jwts.builder()
             .setSubject((userPrincipal.getId().toString()))

@@ -37,7 +37,7 @@ public class ProductController {
     }
 
     @PostMapping(path = "/{id}/addCategory")
-    public ResponseEntity addCategory(@PathVariable UUID id,
+    public ResponseEntity<Void> addCategory(@PathVariable UUID id,
                                       @Valid @RequestBody InsertCaregoryOnProductCommand command) {
 
         insertCaregoryInProduct.handle(command, id);

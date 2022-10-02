@@ -16,8 +16,7 @@ public interface UserDomainRepository {
     Optional<User> findById(UUID id);
 
     default User findByIdOrThrowNotFound(UUID id) {
-        var product = this.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return product;
+        return this.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     List<User> findAll();
