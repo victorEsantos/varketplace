@@ -8,6 +8,10 @@ import com.varketplace.product.FindProductUseCase.ProductDto;
 import com.varketplace.product.InsertCaregoryInProductUseCase;
 import com.varketplace.product.InsertCaregoryInProductUseCase.InsertCaregoryOnProductCommand;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,10 +55,17 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
+    @GetMapping(path = "/{id}")
     public ResponseEntity<ProductDto> getById(@RequestParam UUID id) {
         var category = findProduct.handle(FindProductByIdCommand.of(id));
 
         return ResponseEntity.ok(category);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ProductDto>> getAll(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        var products = findProduct.handle(FindProductUseCase.FindAllProductCommand.of(pageable));
+
+        return ResponseEntity.ok(products);
     }
 }

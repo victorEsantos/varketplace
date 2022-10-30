@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
@@ -14,6 +16,8 @@ public interface FindProductUseCase {
 
     ProductDto handle(FindProductByIdCommand cmd);
 
+    Page<ProductDto> handle(FindAllProductCommand of);
+
     @Value
     @AllArgsConstructor(staticName = "of")
     @ApiModel(description = "Info product id")
@@ -21,6 +25,14 @@ public interface FindProductUseCase {
 
         @NotBlank
         private UUID id;
+    }
+
+    @Value
+    @AllArgsConstructor(staticName = "of")
+    @ApiModel(description = "All products")
+    class FindAllProductCommand {
+        Pageable pageable;
+
     }
 
     @Builder

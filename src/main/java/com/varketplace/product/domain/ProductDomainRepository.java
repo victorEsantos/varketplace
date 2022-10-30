@@ -2,8 +2,9 @@ package com.varketplace.product.domain;
 
 import com.varketplace.infra.exception.ResourceNotFoundException;
 import com.varketplace.product.domain.model.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface ProductDomainRepository {
@@ -19,5 +20,5 @@ public interface ProductDomainRepository {
         return product;
     }
 
-    List<Product> findAll();
+    Page<Product> findAll(Pageable pageable);
 }
