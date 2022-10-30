@@ -18,6 +18,7 @@ public class GetAllUsersService implements GetAllUsersUseCase {
 
     @Override
     public Page<User> handle(GetAllUsersCommand cmd) {
-        return repository.findAll(cmd.getSpec(), cmd.getPageable());
+//        return repository.findAll(cmd.getSpec(), cmd.getPageable());
+        return null;
     }
 }

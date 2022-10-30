@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
+//import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,19 +21,21 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TB_ROLES")
-public class RoleModel implements GrantedAuthority, Serializable {
+@Table(name = "role")
+//public class RoleModel implements GrantedAuthority, Serializable {
+public class RoleModel implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "role_id")
     private UUID roleId;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true, length = 30)
     private RoleType roleName;
 
-    @Override
-    @JsonIgnore
-    public String getAuthority() {
-        return this.roleName.toString();
-    }
+//    @Override
+//    @JsonIgnore
+//    public String getAuthority() {
+//        return this.roleName.toString();
+//    }
 }

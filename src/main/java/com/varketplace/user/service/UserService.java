@@ -21,9 +21,9 @@ import java.util.UUID;
 public class UserService {
     private final UserDomainRepository repository;
 
-    public Page<User> getAll(UserSpecification.UserSpec spec, Pageable pageable){
-        return repository.findAll(spec, pageable);
-    }
+//    public Page<User> getAll(UserSpecification.UserSpec spec, Pageable pageable){
+//        return repository.findAll(spec, pageable);
+//    }
 
     public Optional<User> findById(UUID userId) {
         return repository.findById(userId);

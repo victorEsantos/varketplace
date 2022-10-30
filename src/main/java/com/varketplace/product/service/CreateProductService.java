@@ -40,6 +40,10 @@ public class CreateProductService implements CreateProductUseCase {
     }
 
     private Set<Category> getCategories(Set<UUID> categories) {
+        if(categories == null) {
+            return null;
+        }
+
         return categories.stream().map(categoryRepository::findByIdOrThrowNotFound).collect(Collectors.toSet());
     }
 }

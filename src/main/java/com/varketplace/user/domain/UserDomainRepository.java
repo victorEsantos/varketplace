@@ -23,7 +23,7 @@ public interface UserDomainRepository {
 
     Optional<User> findByName(String name);
 
-    Page<User> findAll(UserSpecification.UserSpec spec, Pageable pageable);
+//    Page<User> findAll(UserSpecification.UserSpec spec, Pageable pageable);
 
     void delete(User user);
 }
