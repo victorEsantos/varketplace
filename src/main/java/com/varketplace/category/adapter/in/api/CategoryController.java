@@ -3,8 +3,13 @@ package com.varketplace.category.adapter.in.api;
 import com.varketplace.category.CreateCategoryUseCase;
 import com.varketplace.category.CreateCategoryUseCase.CreateCategoryCommand;
 import com.varketplace.category.FindCategoryUseCase;
+import com.varketplace.category.FindCategoryUseCase.CategoryDto;
 import com.varketplace.category.FindCategoryUseCase.FindCategoryByIdCommand;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,11 +43,18 @@ public class CategoryController {
         return ResponseEntity.created(uri).build();
     }
 
-    @GetMapping
-    public ResponseEntity<FindCategoryUseCase.CategoryDto> getById(@RequestParam UUID id) {
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<CategoryDto> getById(@RequestParam UUID id) {
         var category = findCategory.handle(FindCategoryByIdCommand.of(id));
 
         return ResponseEntity.ok(category);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<CategoryDto>> getAll(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        var products = findCategory.handle(FindCategoryUseCase.FindAllCategoryCommand.of(pageable));
+
+        return ResponseEntity.ok(products);
     }
 
 }

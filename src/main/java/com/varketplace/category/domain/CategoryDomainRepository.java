@@ -2,8 +2,9 @@ package com.varketplace.category.domain;
 
 import com.varketplace.category.domain.model.Category;
 import com.varketplace.infra.exception.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface CategoryDomainRepository {
@@ -19,5 +20,5 @@ public interface CategoryDomainRepository {
         return category;
     }
 
-    List<Category> findAll();
+    Page<Category> findAll(Pageable pageable);
 }

@@ -1,10 +1,13 @@
 package com.varketplace.category;
 
 import com.varketplace.category.domain.model.Category;
+import com.varketplace.product.FindProductUseCase;
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import javax.validation.constraints.NotBlank;
 import java.util.UUID;
@@ -13,6 +16,8 @@ public interface FindCategoryUseCase {
 
     CategoryDto handle(FindCategoryByIdCommand cmd);
 
+    Page<CategoryDto> handle(FindAllCategoryCommand of);
+
     @Value
     @AllArgsConstructor(staticName = "of")
     @ApiModel(description = "Info category id")
@@ -20,6 +25,14 @@ public interface FindCategoryUseCase {
 
         @NotBlank
         private UUID id;
+    }
+
+    @Value
+    @AllArgsConstructor(staticName = "of")
+    @ApiModel(description = "All categories")
+    class FindAllCategoryCommand {
+        Pageable pageable;
+
     }
 
     @Builder

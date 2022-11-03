@@ -27,11 +27,11 @@ public class FindProductService implements FindProductUseCase {
 
     @Override
     public Page<ProductDto> handle(FindAllProductCommand cmd) {
-        var produtos = repository.findAll(cmd.getPageable());
+        var products = repository.findAll(cmd.getPageable());
 
-        if(isNull(produtos)) {
+        if(isNull(products)) {
             return null;
         }
-        return new PageImpl<>(produtos.stream().map(ProductDto::from).toList());
+        return new PageImpl<>(products.stream().map(ProductDto::from).toList());
     }
 }
