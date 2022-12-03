@@ -34,6 +34,12 @@ public class Category extends DomainEntity {
     @ManyToMany(mappedBy = "categories")
     private Set<Product> products = new HashSet<>();
 
+
+    public void update(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

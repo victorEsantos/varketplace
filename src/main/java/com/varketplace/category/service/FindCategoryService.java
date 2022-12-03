@@ -28,9 +28,7 @@ public class FindCategoryService implements FindCategoryUseCase {
     @Override
     public Page<CategoryDto> handle(FindAllCategoryCommand cmd) {
         var categories = repository.findAll(cmd.getPageable());
-        if(isNull(categories)) {
-            return null;
-        }
+        if (isNull(categories)) return null;
 
 
         return new PageImpl<>(categories.stream().map(CategoryDto::from).toList());

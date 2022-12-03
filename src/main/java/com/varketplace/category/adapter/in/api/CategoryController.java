@@ -5,6 +5,8 @@ import com.varketplace.category.CreateCategoryUseCase.CreateCategoryCommand;
 import com.varketplace.category.FindCategoryUseCase;
 import com.varketplace.category.FindCategoryUseCase.CategoryDto;
 import com.varketplace.category.FindCategoryUseCase.FindCategoryByIdCommand;
+import com.varketplace.category.UpdateCategoryUseCase;
+import com.varketplace.category.UpdateCategoryUseCase.UpdateCategoryCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +35,7 @@ public class CategoryController {
     public static final String PATH = "/categories";
 
     private final CreateCategoryUseCase createCategory;
+    private final UpdateCategoryUseCase updateCategory;
     private final FindCategoryUseCase findCategory;
 
     @PostMapping
@@ -41,6 +45,14 @@ public class CategoryController {
         var uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
 
         return ResponseEntity.created(uri).build();
+    }
+
+    @PutMapping(path = "/{id}")
+    public ResponseEntity<String> update(@Valid @RequestBody UpdateCategoryCommand command) {
+        command.setId(command.getId());
+        updateCategory.handle(command);
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(path = "/{id}")
